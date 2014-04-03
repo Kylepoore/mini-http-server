@@ -15,16 +15,23 @@ directories:
 	mkdir -p ${BUILDDIR} ${BINDIR}
 
 ${EXEC}: server.c ${BUILDDIR}/server.o
-	${CC} ${BUILDDIR}/server.o -o ${BINDIR}/${EXEC}
+	${CC} ${BUILDDIR}/*.o -o ${BINDIR}/${EXEC}
 
-${BUILDDIR}/server.o: server.c
+${BUILDDIR}/server.o: server.c ${BUILDDIR}/dispatch.o dispatch.c
 	${CC} -c server.c -o ${BUILDDIR}/server.o
 
-test: test-file
+${BUILDDIR}/dispatch.o: dispatch.c dispatch.h ${BUILDDIR}/GET.o GET.c ${BUILDDIR}/POST.o POST.c
+	${CC} -c dispatch.c -o ${BUILDDIR}/dispatch.o
+
+${BUILDDIR}/GET.o: GET.c
+	${CC} -c GET.c -o ${BUILDDIR}/GET.o
+
+${BUILDDIR}/POST.o: POST.c
+	${CC} -c POST.c -o ${BUILDDIR}/POST.o
+
+test:
 	@echo you will have to do these from different terminals.
 	@echo to test the server, run: make test-server
-	@echo to test the client in write mode, in a different terminal run: make test-client-write
-	@echo to test the client in read mode, in a different terminal run: make test-client-read
 
 submit:
 	svn commit -m "submitted for grade"
