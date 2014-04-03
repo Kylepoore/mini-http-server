@@ -7,27 +7,32 @@ LOCALHOST = localhost
 FILENAME = test.txt
 BUILDDIR = ../build
 BINDIR = ../bin
+MODDIR = modules
+MODULES = GET.c POST.c
+FRAMEWORK = dispatch.c server.c
+MODULE_OBJS = $(MODULES:%.c=$(BUILDDIR)/$(MODDIR)/%.o)
+FRAMEWORK_OBJS = $(FRAMEWORK:%.c=$(BUILDDIR)/%.o)
 EXEC = server
 
 all: directories ${EXEC}
 
 directories:
-	mkdir -p ${BUILDDIR} ${BINDIR}
+	mkdir -p ${BUILDDIR}/${MODDIR} ${BINDIR}
 
-${EXEC}: server.c ${BUILDDIR}/server.o
-	${CC} ${BUILDDIR}/*.o -o ${BINDIR}/${EXEC}
+${EXEC}: ${FRAMEWORK_OBJS} ${MODULE_OBJS}
+	${CC} ${FRAMEWORK_OBJS} ${MODULE_OBJS} -o ${BINDIR}/${EXEC}
 
-${BUILDDIR}/server.o: server.c ${BUILDDIR}/dispatch.o dispatch.c
+${BUILDDIR}/server.o: ${FRAMEWORK} ${BUILDDIR}/dispatch.o
 	${CC} -c server.c -o ${BUILDDIR}/server.o
 
-${BUILDDIR}/dispatch.o: dispatch.c dispatch.h ${BUILDDIR}/GET.o GET.c ${BUILDDIR}/POST.o POST.c
+${BUILDDIR}/dispatch.o: dispatch.c dispatch.h ${MODULE_OBJS} 
 	${CC} -c dispatch.c -o ${BUILDDIR}/dispatch.o
 
-${BUILDDIR}/GET.o: GET.c
-	${CC} -c GET.c -o ${BUILDDIR}/GET.o
+modules: ${MODULES_OBJS}
+	@echo modules compiled.
 
-${BUILDDIR}/POST.o: POST.c
-	${CC} -c POST.c -o ${BUILDDIR}/POST.o
+${BUILDDIR}/${MODDIR}/%.o: %.c %.h
+	${CC} -c $< -o $@
 
 test:
 	@echo you will have to do these from different terminals.
