@@ -22,9 +22,10 @@ ssize_t readline(int sockfd, void *vptr, size_t maxlen) {
   buffer = vptr;
 
   for (n = 1; n < maxlen; n++) {
+    vprintf("reading from socket: %d, ", sockfd);
     if ((chars_read = read(sockfd, &c, 1)) == 1) {
       *buffer++ = c;
-
+      vprintf("%x\n",(int)c);
       /* Check for CR */
       if (c == '\r') {
         /* Found a CF, set flag */

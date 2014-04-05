@@ -96,7 +96,7 @@ int parse_request(int conn_fd, request *req) {
      relevant to us, instead of going through each line */
   while ((tmp = readline(conn_fd, buffer, MAX_REQ_LINE_LENGTH - 1)) > 0) {
     strip(buffer);
-    printf("buffer [%3zu]: %s\n", strlen(buffer), buffer);
+    vprintf("buffer [%3zu]: %s\n", strlen(buffer), buffer);
     if (first_line) {
       if (parse_req_line(buffer, req)) {
         break;
