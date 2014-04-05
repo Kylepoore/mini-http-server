@@ -1,3 +1,3 @@
-extern int modules_count;
+extern int module_count;
 extern char* module_names[];
-void dispatch(const char *method, const char *request);
+void dispatch(int conn, request req);

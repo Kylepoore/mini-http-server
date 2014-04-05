@@ -1,2 +1,2 @@
 #include "../request.h"
-extern void POST(request req);
+extern void POST(int conn, request req);

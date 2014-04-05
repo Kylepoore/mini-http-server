@@ -11,20 +11,28 @@ char *module_names[] = {"GET",
                         "POST"
                        };
 
-void (*modules[])(request) = {GET,
-                            POST
-                           };
+void (*modules[])(int, request) = {GET,
+                                   POST
+                                  };
 
-void dispatch(request req){
-  int i;
-  for(i=0;i<module_count;i++){
-    if(!strncmp(req.method,module_names[i],METHOD_NAME_LENGTH)){
-      modules[i](req);
-      break;
-    }
+void dispatch(int conn, request req){
+  if (req.method_index < module_count) {
+    modules[req.method_index](conn, req);
   }
-  if(i == module_count){
-    printf("error: unrecognized method.\n");
+  else {
+    perror("dispatch: unsupported HTTP method");
+    exit(EXIT_FAILURE);
   }
+
+  // int i;
+  // for(i=0;i<module_count;i++){
+  //   if(!strncmp(req.method,module_names[i],METHOD_NAME_LENGTH)){
+  //     modules[i](req);
+  //     break;
+  //   }
+  // }
+  // if(i == module_count){
+  //   printf("error: unrecognized method.\n");
+  // }
   
 }

@@ -1,8 +1,15 @@
 /*
-** server.c
-**
-** Author: Robert Correiro
+  
+  server.c
+  ========
+
+  Author: Robert Correiro
+
+  A relatively simple web server implementation.
+
 */
+
+#include "process_request.h"  /* process_request() */
 
 #include <stdio.h>  /* fprintf */
 #include <stdlib.h> /* exit */
@@ -11,9 +18,6 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <signal.h> /* sigaction */
-
-#include "dispatch.h"
-#include "request.h"
 
 #define PORT "8080"
 #define BACKLOG 10  // number of pending connections server queue holds
@@ -31,10 +35,6 @@ void *get_in_addr(struct sockaddr *sa) {
     return &( ((struct sockaddr_in *)sa) -> sin_addr );
   }
   return &( ((struct sockaddr_in6 *)sa) -> sin6_addr );
-}
-
-void process_request(int sockfd) {
-  // dispatch(argv[1],argv[2]);
 }
 
 int main (void) {
@@ -107,19 +107,18 @@ int main (void) {
     exit(1);
   }
 
-  printf("Listening for connections...");
+  printf("Listening for connections...\n");
 
   /* main accept() loop */
   while (1) {
-
-    /* Wait for connection */
+    /* Waiting for connections */
     new_fd = accept(listen_fd, (struct sockaddr *)&cli_addr, &cli_addr_sz);
     if (new_fd == -1) {
       perror("server: accept");
       continue;
     }
 
-    /* Lookup connection's IP to print*/
+    /* Convert connection's IP to printable form*/
     inet_ntop(cli_addr.ss_family, get_in_addr((struct sockaddr *)&cli_addr),
               in_addr, sizeof in_addr);
     printf("Got connection from %s\n", in_addr);
@@ -135,9 +134,12 @@ int main (void) {
         exit(EXIT_FAILURE);
       }
 
+      // printf("Child: close()'d listen_fd, about to process_request()\n");
+
       process_request(new_fd);
 
-      /* Close the accept()ed socket and exit */
+      // printf("Child: processed request, exiting...\n");
+      /* Close the accept()'d socket and exit */
       if (close(new_fd) == -1) {
         perror("server: error closing connection socket");
         exit(EXIT_FAILURE);
@@ -145,11 +147,12 @@ int main (void) {
       exit(EXIT_SUCCESS);
     } 
 
-    /* This is the parent who doesn't need the accept()ed socket */
+    /* This is the parent who doesn't need the accept()'d socket */
     if (close(new_fd) == -1) {
       perror("server: error closing connection socket in parent");
       exit(EXIT_FAILURE);
     }
+    // printf("Parent: close()'d new_fd, accept()ing more connections\n");
   }
   return 0;
 }
