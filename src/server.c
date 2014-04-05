@@ -30,8 +30,12 @@ void *get_in_addr(struct sockaddr *sa) {
   return &( ((struct sockaddr_in6 *)sa) -> sin6_addr );
 }
 
+void process_request(int sockfd) {
+
+}
+
 int main (void) {
-  int sockfd;
+  int listen_fd;
   int new_fd;
   int status;
   int reuse_val = 1;
@@ -40,8 +44,8 @@ int main (void) {
   struct addrinfo hints;
   struct addrinfo *res;
   struct addrinfo *p;
-  struct sockaddr_storage their_addr;
-  socklen_t their_addr_sz = sizeof their_addr;
+  struct sockaddr_storage cli_addr;
+  socklen_t cli_addr_sz = sizeof cli_addr;
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
@@ -53,20 +57,23 @@ int main (void) {
     exit(1);
   }
 
+  /* Create socket */
   for (p = res; p != NULL; p = p->ai_next) {
-    if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+    if ((listen_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
       perror("server: socket");
       continue;
     }
 
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, 
+    /* Prevent "Address already in use" error */
+    if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, 
             &reuse_val, sizeof(int)) == -1) {
       perror("server: setsockopt");
       exit(1);
     }
 
-    if (bind(sockfd, res->ai_addr, res->ai_addrlen) == -1) {
-      close(sockfd);
+    /* Assign socket address to socket */
+    if (bind(listen_fd, res->ai_addr, res->ai_addrlen) == -1) {
+      close(listen_fd);
       perror("server: bind");
       continue;
     }
@@ -81,11 +88,14 @@ int main (void) {
 
   freeaddrinfo(res);
 
-  if (listen(sockfd, BACKLOG) == -1) {
+  /* Make socket listen for connections */
+  if (listen(listen_fd, BACKLOG) == -1) {
     perror("listen");
     exit(1);
   }
 
+  /* Setup main process to ignore the child process death signal,
+     so we don't have to wait() for each one */
   sa.sa_handler = sigchld_handler;
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
@@ -95,27 +105,48 @@ int main (void) {
   }
 
   printf("Listening for connections...");
+
+  /* main accept() loop */
   while (1) {
-    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &their_addr_sz);
+
+    /* Wait for connection */
+    new_fd = accept(listen_fd, (struct sockaddr *)&cli_addr, &cli_addr_sz);
     if (new_fd == -1) {
       perror("server: accept");
       continue;
     }
 
-    inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr),
+    /* Lookup connection's IP to print*/
+    inet_ntop(cli_addr.ss_family, get_in_addr((struct sockaddr *)&cli_addr),
               in_addr, sizeof in_addr);
     printf("Got connection from %s\n", in_addr);
   
-    if (!fork()) {
-      // child doesn't need listening socket
-      close(sockfd);
+    /* Fork child process to serve connection */
+    if (fork() == 0) {
+      
+      /* This is forked child process, close listening socket
+         and process request */
 
-      // child's clean up
-      close(new_fd);
-      exit(0);
+      if (close(listen_fd) == -1) {
+        perror("server: error closing listening socket in child");
+        exit(EXIT_FAILURE);
+      }
+
+      process_request(new_fd);
+
+      /* Close the accept()ed socket and exit */
+      if (close(new_fd) == -1) {
+        perror("server: error closing connection socket");
+        exit(EXIT_FAILURE);
+      }
+      exit(EXIT_SUCCESS);
     } 
-    // parent doesn't need this socket
-    close(new_fd);
+
+    /* This is the parent who doesn't need the accept()ed socket */
+    if (close(new_fd) == -1) {
+      perror("server: error closing connection socket in parent");
+      exit(EXIT_FAILURE);
+    }
   }
   return 0;
 }
