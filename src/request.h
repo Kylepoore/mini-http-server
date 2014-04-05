@@ -1,3 +1,6 @@
+#ifndef REQUEST_H
+#define REQUEST_H
+
 #define METHOD_NAME_LENGTH  32
 #define HTTP_VERSION_LENGTH 16
 #define HEADER_NAME_LENGTH  32
@@ -54,3 +57,5 @@ typedef struct request{
 
 request parse_request(char *buffer,int buflen);
 
+
+#endif //REQUEST_H

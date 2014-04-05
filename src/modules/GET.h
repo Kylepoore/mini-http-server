@@ -1,1 +1,2 @@
-extern void GET(char *request);
+#include "../request.h"
+extern void GET(request req);

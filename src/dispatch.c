@@ -1,9 +1,9 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include "request.h"
 #include "modules/GET.h"
 #include "modules/POST.h"
-
-#define METHOD_NAME_LENGTH 10
 
 int module_count = 2;
 
@@ -11,19 +11,20 @@ char *module_names[] = {"GET",
                         "POST"
                        };
 
-void (*modules[])(char*) = {GET,
+void (*modules[])(request) = {GET,
                             POST
                            };
 
-void dispatch(char *method, char *request){
+void dispatch(request req){
   int i;
   for(i=0;i<module_count;i++){
-    if(!strncmp(method,module_names[i],METHOD_NAME_LENGTH)){
-      modules[i](request);
+    if(!strncmp(req.method,module_names[i],METHOD_NAME_LENGTH)){
+      modules[i](req);
       break;
     }
   }
   if(i == module_count){
     printf("error: unrecognized method.\n");
   }
+  
 }
