@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "dispatch.h"
-
+#include "request.h"
 void main(int argc, char **argv){
   if(argc < 3){
     printf("usage: method request\n");

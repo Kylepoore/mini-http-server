@@ -3,8 +3,6 @@
 # March 3, 2014
 
 CC = gcc -O3
-LOCALHOST = localhost
-FILENAME = test.txt
 BUILDDIR = ../build
 BINDIR = ../bin
 MODDIR = modules
@@ -28,15 +26,8 @@ ${BUILDDIR}/server.o: ${FRAMEWORK} ${BUILDDIR}/dispatch.o
 ${BUILDDIR}/dispatch.o: dispatch.c dispatch.h ${MODULE_OBJS} 
 	${CC} -c dispatch.c -o ${BUILDDIR}/dispatch.o
 
-modules: ${MODULES_OBJS}
-	@echo modules compiled.
-
-${BUILDDIR}/${MODDIR}/%.o: %.c %.h
+${BUILDDIR}/${MODDIR}/%.o: ${MODDIR}/%.c ${MODDIR}/%.h
 	${CC} -c $< -o $@
-
-test:
-	@echo you will have to do these from different terminals.
-	@echo to test the server, run: make test-server
 
 submit:
 	svn commit -m "submitted for grade"

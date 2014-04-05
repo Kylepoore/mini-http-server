@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
-#include "GET.h"
-#include "POST.h"
+#include "modules/GET.h"
+#include "modules/POST.h"
 
 #define METHOD_NAME_LENGTH 10
 
