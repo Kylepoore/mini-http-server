@@ -79,5 +79,4 @@ typedef struct request {
 
 int parse_request(int conn_fd, request *req);
 
-//request parse_request(char *buffer,int buflen);
 #endif //REQUEST_H

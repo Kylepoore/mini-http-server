@@ -10,10 +10,12 @@
 */
 
 #include "process_request.h"  /* process_request() */
+#include "helpers.h"  /* vprintf() */
 
 #include <stdio.h>  /* fprintf */
-#include <stdlib.h> /* exit */
+#include <stdlib.h> /* exit() */
 #include <string.h>  /* memset */
+#include <unistd.h> /* getopt() */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -21,6 +23,8 @@
 
 #define PORT "8080"
 #define BACKLOG 10  // number of pending connections server queue holds
+
+int verbose;
 
 void sigchld_handler(int s) {
   // Wait for all dead processes
@@ -37,7 +41,7 @@ void *get_in_addr(struct sockaddr *sa) {
   return &( ((struct sockaddr_in6 *)sa) -> sin6_addr );
 }
 
-int main (void) {
+int main (int argc, char **argv) {
   int listen_fd;
   int new_fd;
   int status;
@@ -49,6 +53,18 @@ int main (void) {
   struct addrinfo *p;
   struct sockaddr_storage cli_addr;
   socklen_t cli_addr_sz = sizeof cli_addr;
+  char c;
+  verbose = 0;
+
+  while ((c = getopt(argc, argv, "v")) != -1) {
+    switch(c) {
+      case 'v':
+        verbose = 1;
+        break;
+      default:
+        break;
+    }
+  }
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
@@ -134,11 +150,11 @@ int main (void) {
         exit(EXIT_FAILURE);
       }
 
-      // printf("Child: close()'d listen_fd, about to process_request()\n");
+      vprintf("Child: close()'d listen_fd, about to process_request()\n");
 
       process_request(new_fd);
 
-      // printf("Child: processed request, exiting...\n");
+      vprintf("Child: processed request, exiting...\n");
       /* Close the accept()'d socket and exit */
       if (close(new_fd) == -1) {
         perror("server: error closing connection socket");
@@ -152,7 +168,7 @@ int main (void) {
       perror("server: error closing connection socket in parent");
       exit(EXIT_FAILURE);
     }
-    // printf("Parent: close()'d new_fd, accept()ing more connections\n");
+    vprintf("Parent: close()'d new_fd, accept()ing more connections\n");
   }
   return 0;
 }

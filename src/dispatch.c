@@ -1,3 +1,12 @@
+/*
+
+  dispatch.c
+  =========
+    
+  Authors: Kyle Poore, Robert Correiro
+ 
+*/
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,16 +32,4 @@ void dispatch(int conn, request req){
     perror("dispatch: unsupported HTTP method");
     exit(EXIT_FAILURE);
   }
-
-  // int i;
-  // for(i=0;i<module_count;i++){
-  //   if(!strncmp(req.method,module_names[i],METHOD_NAME_LENGTH)){
-  //     modules[i](req);
-  //     break;
-  //   }
-  // }
-  // if(i == module_count){
-  //   printf("error: unrecognized method.\n");
-  // }
-  
 }

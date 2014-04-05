@@ -16,8 +16,6 @@
 #include <stdio.h>  /* printf() */
 #include <string.h>  /* strlen() */
 #include <unistd.h>  /* ssize_t data type */
-//#include <string.h>
-//#include <stdlib.h>
 
 // char *header_names[] = {
 //   "Accept",
@@ -69,21 +67,7 @@ int parse_req_line(char *buffer, request *req) {
     req->method_index = 2;
   }
 
- offset = buffer + len;
-
-  // if (!strncmp("GET ", buffer, 4)) {
-  //   req->method = GET;
-  //   buffer += 4;
-  // }
-  // else if (!strncmp("POST ", buffer, 5)) {
-  //   req->method = POST;
-  //   buffer += 5;
-  // }
-  // else {
-  //   req->method = UNSUPPORTED;
-  //   req->status = 501;
-  //   return -1;
-  // }
+  offset = buffer + len;
 
   /* Seek offset to start of URI */
   while (*offset && isspace(*offset)) {
@@ -106,7 +90,7 @@ void parse_header_line(char *buffer, request *req) {
 int parse_request(int conn_fd, request *req) {
   char buffer[MAX_REQ_LINE_LENGTH];
   int first_line = 1;
-  // printf("About to readline()...\n");
+
   ssize_t tmp;
   /* TODO: change while condition to terminate when we've parsed all lines 
      relevant to us, instead of going through each line */
@@ -123,9 +107,6 @@ int parse_request(int conn_fd, request *req) {
       parse_header_line(buffer, req);  
     }
   }
-
-  //readline(conn_fd, buffer, MAX_REQ_LINE_LENGTH - 1);
-  //printf("buffer: %s\n", buffer);
 }
 
 

@@ -10,6 +10,7 @@
 */
 
 #include "request.h"  /* parse_request() */
+#include "helpers.h" /* vprintf() */
 #include <stdlib.h>  /* exit() and EXIT_FAILURE */
 #include <stdio.h>  /* printf() */
 
@@ -17,7 +18,7 @@
 void process_request(int conn_fd) {
   request req;
 
-  // printf("About to parse_request()...\n");
+  vprintf("About to parse_request()...\n");
 
   if (parse_request(conn_fd, &req) == -1) {
     perror("parse_request");

@@ -11,7 +11,6 @@
 #include "helpers.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>  /* strlen(), isalnum() */
 #include <errno.h>  /* EINTR */
 
