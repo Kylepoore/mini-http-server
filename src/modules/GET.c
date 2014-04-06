@@ -70,7 +70,7 @@ void GET(int conn, request req){
       bytes_read = fread(buffer,1,1024,fp);
       if(!bytes_read) break;
       vprintf("%s",buffer);
-      send(conn,buffer,1024,0);
+      send(conn,buffer,bytes_read,0);
       if(bytes_read < 1024) break;
     }
     vprintf("sent file!\n");
