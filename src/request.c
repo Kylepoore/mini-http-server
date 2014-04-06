@@ -14,8 +14,8 @@
 #include "dispatch.h"
 
 #include <stdio.h>  /* printf() */
-#include <stdlib.h>  /* exit() */
-#include <string.h>  /* strlen() */
+#include <stdlib.h>  /* exit(), malloc(), calloc() */
+#include <string.h>  /* strlen(), strchr() */
 #include <unistd.h>  /* ssize_t data type */
 #include <sys/select.h>  /* select() */
 
@@ -81,21 +81,69 @@ int parse_req_line(char *buffer, request *req) {
   len = strchr(offset, ' ') - offset;
   req->URI = calloc(len + 1, sizeof(char));
   strncpy(req->URI, offset, len);
+
+  if(strstr(buffer, "HTTP/1.1")) {
+    strcpy(req->version, "HTTP/1.1\0");
+  }
+  else {
+    strcpy(req->version, "HTTP/1.0\0");
+  }
 }
 
 void parse_header_line(char *buffer, request *req) {
-  // TODO: change to int, so you can check return code in parse_request
-  static int line_num = 1;
+  int len;
+  char *offset, *header;
 
-  line_num++;
-  if (line_num >= 3) {
+  offset = strchr(buffer, ':');
+  if (offset == NULL) {
+    req->status = 400;
     req->done = 1;
+    return;
   }
+
+  len = offset - buffer;
+  header = calloc(len + 1, sizeof(char));
+  strncpy(header, buffer, len);
+  upcase(header);
+
+  vprintf("header: %s\n", header);
+
+  /* Get past ':' and white space, point to start of header value */
+  offset++;
+  while (*offset && isspace(*offset)) {
+    offset++;
+  }
+  /* If the value isn't there, bad request */
+  if (*offset == '\0') {
+    req->status = 400;
+    req->done = 1;
+    return;
+  }
+
+  vprintf("offset: %s\n", offset);
+
+  if (!strcmp(header, "HOST")) {
+    req->host = malloc(strlen(offset) + 1);
+    strcpy(req->host, offset);
+  }
+  else if (!strcmp(header, "CONTENT-LENGTH")) {
+    req->content_length = atoi(offset);
+  }
+  else if (!strcmp(header, "USER-AGENT")) {
+    req->user_agent = malloc(strlen(offset) + 1);
+    strcpy(req->user_agent, offset);
+  }
+
+  free(header);
+}
+
+void parse_req_body(char *buffer, request *req) {
+
 }
 
 int parse_request(int conn_fd, request *req) {
   char buffer[MAX_REQ_LINE_LENGTH];
-  int first_line = 1, rv;
+  int first_line = 1, rv, req_has_body = 0;
   fd_set readfds;
   struct timeval tv;
 
@@ -104,7 +152,6 @@ int parse_request(int conn_fd, request *req) {
   tv.tv_sec = 5;
   tv.tv_usec = 0;
 
-  req->done = 0;
   do {
     /* Clear and reset file descriptor set */
     FD_ZERO(&readfds);
@@ -126,35 +173,41 @@ int parse_request(int conn_fd, request *req) {
       vprintf("buffer [%3zu]: %s\n", strlen(buffer), buffer);
 
       if (first_line) {
-        if (parse_req_line(buffer, req)) {
-          break;
-        }
+        parse_req_line(buffer, req);
         first_line--;  /* turn flag off */
+      }
+      else if (!strncmp(buffer, "\r\n", 2)) {
+        /* Blank line case */
+        vprintf("Blank line!\n");
+        /* Check if Content-Length header was received */
+        if (req->content_length == -1) {
+          req->done = 1;
+        }
+        else {
+          /* Else got it, and know to look for the request body */
+          req_has_body = 1;
+          continue;
+        }
+      }
+      else if (req_has_body) {
+        parse_req_body(buffer, req);
       }
       else {
         parse_header_line(buffer, req);  
       }
     }
   } while(req->done == 0);
-
-  // ssize_t tmp;
-  /* TODO: change while condition to terminate when we've parsed all lines 
-     relevant to us, instead of going through each line */
-  // while ((tmp = readline(conn_fd, buffer, MAX_REQ_LINE_LENGTH - 1)) > 0) {
-  //   strip(buffer);
-  //   vprintf("buffer [%3zu]: %s\n", strlen(buffer), buffer);
-  //   if (first_line) {
-  //     if (parse_req_line(buffer, req)) {
-  //       break;
-  //     }
-  //     first_line--;  /* turn flag off */
-  //   }
-  //   else {
-  //     parse_header_line(buffer, req);  
-  //   }
-  // }
 }
 
+void init_request(request *req) {
+  req->method_index = -1;
+  req->status = 200;
+  req->URI = NULL;
+  req->host = NULL;
+  req->content_length = -1;
+  req->user_agent = NULL;
+  req->done = 0;
+}
 
 // request parse_request(char *buffer,int buflen){
 //   int i,j;

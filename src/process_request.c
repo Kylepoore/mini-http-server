@@ -18,6 +18,9 @@
 void process_request(int conn_fd) {
   request req;
 
+  vprintf("Initializing request struct\n");
+  init_request(&req);
+
   vprintf("About to parse_request()...\n");
 
   if (parse_request(conn_fd, &req) == -1) {
