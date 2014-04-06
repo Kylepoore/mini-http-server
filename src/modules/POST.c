@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "POST.h"
+#include "../helpers.h"
 
 void POST(int conn, request req){
-  printf("POST: %s\n",req.URI);
-  fflush(stdout);
+  vprintf("POST: %s\n",req.URI);
 }
