@@ -20,7 +20,7 @@
 } while (0);
 
 extern int verbose;
-
+extern char *root_path;
 ssize_t readline(int sockfd, void *vptr, size_t maxlen);
 void strip(char *buffer);
 

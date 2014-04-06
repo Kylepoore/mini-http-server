@@ -25,7 +25,7 @@
 #define BACKLOG 10  // number of pending connections server queue holds
 
 int verbose;
-
+char *root_path;
 void sigchld_handler(int s) {
   // Wait for all dead processes
   // Use a non-blocking call so this signal handler won't block
@@ -45,6 +45,7 @@ int main (int argc, char **argv) {
   int listen_fd;
   int new_fd;
   int status;
+  char *options = "v";
   int reuse_val = 1;
   char in_addr[INET6_ADDRSTRLEN];
   struct sigaction sa;
@@ -56,7 +57,7 @@ int main (int argc, char **argv) {
   char c;
   verbose = 0;
 
-  while ((c = getopt(argc, argv, "v")) != -1) {
+  while ((c = getopt(argc, argv, options)) != -1) {
     switch(c) {
       case 'v':
         verbose = 1;
@@ -64,6 +65,16 @@ int main (int argc, char **argv) {
       default:
         break;
     }
+  }
+
+  if(optind < argc){
+    if((root_path = realpath(argv[optind],root_path)) == NULL){
+      fprintf(stderr,"%s: Invalid path\n",argv[0]);
+      exit(EXIT_FAILURE);
+    }
+  }else{
+    fprintf(stderr, "Usage: %s [%s] <root path>\n",argv[0],options);
+    exit(EXIT_FAILURE);
   }
 
   memset(&hints, 0, sizeof hints);

@@ -9,6 +9,7 @@
 
 void GET(int conn, request req){
   char filename[1024];
+  char *content_type;
   char buffer[1024];
   FILE *fp;
   vprintf("GET: %s\n",req.URI);
@@ -24,8 +25,38 @@ void GET(int conn, request req){
     fseek(fp,0,SEEK_SET);
     char *response = "HTTP/1.1 200 OK\r\n";
     vprintf("HTTP/1.1 200 OK\r\n");
-    char *content_type = "Content-Type: text/html\r\n";
-    vprintf("Content-Type: text/html\r\n");
+    if(!strncmp(strrchr(filename,'.')+1,"ico",3)){
+      content_type = "Content-Type: icon\r\n";
+      vprintf("Content-Type: icon\r\n");
+    }else if(!strncmp(strrchr(filename,'.')+1,"html",4)){
+      content_type = "Content-Type: text/html\r\n";
+      vprintf("Content-Type: text/html\r\n");
+    }else if(!strncmp(strrchr(filename,'.')+1,"js",2)){
+      content_type = "Content-Type: application/javascript\r\n";
+      vprintf("Content-Type: application/javascript\r\n");
+    }else if(!strncmp(strrchr(filename,'.')+1,"css",3)){
+      content_type = "Content-Type: text/css\r\n";
+      vprintf("Content-Type: text/css\r\n");
+    }else if(!strncmp(strrchr(filename,'.')+1,"pdf",3)){
+      content_type = "Content-Type: application/pdf\r\n";
+      vprintf("Content-Type: application/pdf\r\n");
+    }else if(!strncmp(strrchr(filename,'.')+1,"jpg",3)){
+      content_type = "Content-Type: image/jpeg\r\n";
+      vprintf("Content-Type: image/jpeg\r\n");
+    }else if(!strncmp(strrchr(filename,'.')+1,"png",3)){
+      content_type = "Content-Type: image/png\r\n";
+      vprintf("Content-Type: image/png\r\n");
+    }else{
+      content_type = "Content-Type: text/plain\r\n";
+      vprintf("Content-Type: text/plain\r\n");
+    }
+
+
+
+
+
+
+
     char content_length[32];
     sprintf(content_length,"Content-Length: %d\r\n\r\n",length);
     vprintf("Content-Length: %d\r\n\r\n",length);
