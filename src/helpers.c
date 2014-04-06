@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>  /* strlen(), isalnum() */
 #include <errno.h>  /* EINTR */
+#include <ctype.h>  /* toupper() */
 
 /* Reads a line from given socket */
 ssize_t readline(int sockfd, void *vptr, size_t maxlen) {
@@ -22,10 +23,12 @@ ssize_t readline(int sockfd, void *vptr, size_t maxlen) {
   buffer = vptr;
 
   for (n = 1; n < maxlen; n++) {
-    vprintf("reading from socket: %d, ", sockfd);
+    //vprintf("reading from socket: %d, ", sockfd);
     if ((chars_read = read(sockfd, &c, 1)) == 1) {
       *buffer++ = c;
-      vprintf("%x\n",(int)c);
+     // vprintf("%x\n",(int)c);
+      
+
       /* Check for CR */
       if (c == '\r') {
         /* Found a CF, set flag */
@@ -36,15 +39,19 @@ ssize_t readline(int sockfd, void *vptr, size_t maxlen) {
       /* If we've seen a CR, check for LF */
       if (cr == 1 && c == '\n') {
         /* Found a CRLF */
-        
-        /* If it's at the beginning, ignore it */
+
+        /* Check blank line case */
         if (n == 2) {
-          continue;
+          return n;
         }
-        /* Otherwise, it marks end-of-line */
         else {
           break;
         }
+      }
+
+      /* Otherwise, check for just LF case */
+      if (c == '\n') {
+        break;
       }
 
       /* Saw a CR but no LF, so reset flag */
@@ -77,10 +84,17 @@ ssize_t readline(int sockfd, void *vptr, size_t maxlen) {
 }
 
 /* Removes trailing LWS (linear white space) from string */
-void strip(char *buffer) {
-  int sz = strlen(buffer) - 1;
+void strip(char *str) {
+  int sz = strlen(str) - 1;
 
-  while (!isalnum(buffer[sz]) && sz >= 0) {
-    buffer[sz--] = '\0';
+  while (!isalnum(str[sz]) && sz >= 0) {
+    str[sz--] = '\0';
+  }
+}
+
+void upcase(char *str) {
+  while (*str) {
+    *str = toupper(*str);
+    str++;
   }
 }

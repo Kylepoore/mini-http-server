@@ -13,7 +13,7 @@
 #define REQUEST_H
 
 #define METHOD_NAME_LENGTH  8
-//#define HTTP_VERSION_LENGTH 16
+#define HTTP_VERSION_LENGTH 9
 //#define HEADER_NAME_LENGTH  32
 
 #define MAX_REQ_LINE_LENGTH 1024
@@ -71,13 +71,15 @@ typedef struct request {
   int method_index;
   int status;
   char *URI;
+  char version[HTTP_VERSION_LENGTH];
+  char *host;
+  int content_length;
+  char *user_agent;
   int done;
-  // char version[HTTP_VERSION_LENGTH];
-  // header headers[16];
-  // char *body;
-  // int body_len;
 } request;
 
+int parse_req_line(char *buffer, request *req);
+void parse_header_line(char *buffer, request *req);
 int parse_request(int conn_fd, request *req);
 
 #endif //REQUEST_H
