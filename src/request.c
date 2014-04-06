@@ -14,8 +14,10 @@
 #include "dispatch.h"
 
 #include <stdio.h>  /* printf() */
+#include <stdlib.h>  /* exit() */
 #include <string.h>  /* strlen() */
 #include <unistd.h>  /* ssize_t data type */
+#include <sys/select.h>  /* select() */
 
 // char *header_names[] = {
 //   "Accept",
@@ -79,34 +81,78 @@ int parse_req_line(char *buffer, request *req) {
   len = strchr(offset, ' ') - offset;
   req->URI = calloc(len + 1, sizeof(char));
   strncpy(req->URI, offset, len);
-  return 0;
 }
 
 void parse_header_line(char *buffer, request *req) {
   // TODO: change to int, so you can check return code in parse_request
+  static int line_num = 1;
 
+  line_num++;
+  if (line_num >= 3) {
+    req->done = 1;
+  }
 }
 
 int parse_request(int conn_fd, request *req) {
   char buffer[MAX_REQ_LINE_LENGTH];
-  int first_line = 1;
+  int first_line = 1, rv;
+  fd_set readfds;
+  struct timeval tv;
 
-  ssize_t tmp;
-  /* TODO: change while condition to terminate when we've parsed all lines 
-     relevant to us, instead of going through each line */
-  while ((tmp = readline(conn_fd, buffer, MAX_REQ_LINE_LENGTH - 1)) > 0) {
-    strip(buffer);
-    vprintf("buffer [%3zu]: %s\n", strlen(buffer), buffer);
-    if (first_line) {
-      if (parse_req_line(buffer, req)) {
-        break;
-      }
-      first_line--;  /* turn flag off */
+
+  /* Set timeout to 5.0 sec */
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
+
+  req->done = 0;
+  do {
+    /* Clear and reset file descriptor set */
+    FD_ZERO(&readfds);
+    FD_SET(conn_fd, &readfds);
+
+    rv = select(conn_fd + 1, &readfds, NULL, NULL, &tv);
+
+    if (rv == -1) {
+      perror("select");
+      exit(EXIT_FAILURE);
+    }
+    else if (rv == 0) {
+      /* Timed out */
+      return -1;
     }
     else {
-      parse_header_line(buffer, req);  
+      readline(conn_fd, buffer, MAX_REQ_LINE_LENGTH - 1);
+      strip(buffer);
+      vprintf("buffer [%3zu]: %s\n", strlen(buffer), buffer);
+
+      if (first_line) {
+        if (parse_req_line(buffer, req)) {
+          break;
+        }
+        first_line--;  /* turn flag off */
+      }
+      else {
+        parse_header_line(buffer, req);  
+      }
     }
-  }
+  } while(req->done == 0);
+
+  // ssize_t tmp;
+  /* TODO: change while condition to terminate when we've parsed all lines 
+     relevant to us, instead of going through each line */
+  // while ((tmp = readline(conn_fd, buffer, MAX_REQ_LINE_LENGTH - 1)) > 0) {
+  //   strip(buffer);
+  //   vprintf("buffer [%3zu]: %s\n", strlen(buffer), buffer);
+  //   if (first_line) {
+  //     if (parse_req_line(buffer, req)) {
+  //       break;
+  //     }
+  //     first_line--;  /* turn flag off */
+  //   }
+  //   else {
+  //     parse_header_line(buffer, req);  
+  //   }
+  // }
 }
 
 

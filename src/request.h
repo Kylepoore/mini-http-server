@@ -71,6 +71,7 @@ typedef struct request {
   int method_index;
   int status;
   char *URI;
+  int done;
   // char version[HTTP_VERSION_LENGTH];
   // header headers[16];
   // char *body;
