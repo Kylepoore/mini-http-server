@@ -83,6 +83,19 @@ ssize_t readline(int sockfd, void *vptr, size_t maxlen) {
   return n;
 }
 
+int read_body(int sockfd, char *buffer, int length){
+  int chars_read;
+  buffer = malloc(length * sizeof(char));
+  if ((chars_read = read(sockfd, buffer, length)) == length){
+    return length;
+  }else if(chars_read < 0){
+    fprintf(stderr,"Error: unable to read %d bytes from body!\n",length);
+    exit(EXIT_FAILURE);
+  }else{
+    return chars_read;
+  }
+}
+
 /* Removes trailing LWS (linear white space) from string */
 void strip(char *str) {
   int sz = strlen(str) - 1;
