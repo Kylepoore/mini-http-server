@@ -12,10 +12,13 @@ MODULE_OBJS = $(MODULES:%.c=$(BUILDDIR)/$(MODDIR)/%.o)
 FRAMEWORK_OBJS = $(FRAMEWORK:%.c=$(BUILDDIR)/%.o)
 EXEC = server
 
-all: directories ${EXEC}
+all: directories ../public/helloworld ${EXEC}
 
 directories:
 	mkdir -p ${BUILDDIR}/${MODDIR} ${BINDIR}
+
+../public/helloworld: ../public/helloworld.c
+	${CC} ../public/helloworld.c -o ../public/helloworld
 
 ${EXEC}: ${FRAMEWORK_OBJS} ${MODULE_OBJS}
 	${CC} ${FRAMEWORK_OBJS} ${MODULE_OBJS} -o ${BINDIR}/${EXEC}
