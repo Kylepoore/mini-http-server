@@ -18,7 +18,7 @@ directories:
 	mkdir -p ${BUILDDIR}/${MODDIR} ${BINDIR}
 
 ../public/%: ../public/%.c
-	${CC} ../public/%.c -o ../public/%
+	${CC} $< -o $@
 
 ${EXEC}: ${FRAMEWORK_OBJS} ${MODULE_OBJS}
 	${CC} ${FRAMEWORK_OBJS} ${MODULE_OBJS} -o ${BINDIR}/${EXEC}

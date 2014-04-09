@@ -2,7 +2,7 @@
 
   helpers.c
   =========
-  Author: Robert Correiro
+  Author: Robert Correiro, Kyle Poore
 
   Helper functions for server.
 
