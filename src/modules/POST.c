@@ -36,7 +36,10 @@ void POST(int conn, request req){
   filename[1] = '/';
   strncpy(filename+2,req.URI + 1,strlen(req.URI + 1));
   vprintf("exec: %s/%s\n",root_path,filename);
-  if(pipe(fdfrom) == -1 || pipe(fdto) == -1){
+  if(pipe(fdfrom) == -1){
+    exit(EXIT_FAILURE);
+  }
+  if(pipe(fdto) == -1){
     exit(EXIT_FAILURE);
   }
   if((pid = vfork()) == -1){
@@ -51,7 +54,7 @@ void POST(int conn, request req){
 
     close(fdto[1]);
     close(fdfrom[0]);
-    execlp(filename,filename,(char*)NULL);
+    execl(filename,filename,(char*)NULL);
     fprintf(stderr,"this shouldn't happen\n");
     exit(EXIT_FAILURE);
   }else{
@@ -72,18 +75,18 @@ void POST(int conn, request req){
     char *content_type = "Content-Type: text/plain\r\n";
     char *transfer_encoding = "Transfer-Encoding: chunked\r\n\r\n";
     send(conn,response,strlen(response),0); 
-    vprintf("Parent: %s",response);
+    vprintf("Send: %s",response);
     send(conn,content_type,strlen(content_type),0);
-    vprintf("Parent: %s",content_type);
+    vprintf("Send: %s",content_type);
     send(conn,transfer_encoding,strlen(transfer_encoding),0);
-    vprintf("Parent: %s",transfer_encoding);
+    vprintf("Send: %s",transfer_encoding);
 
     while((bytes_read = read(fdfrom[0],buffer,1024))){
       if(bytes_read < 1){
         break;
       }
       memset(lengthbuff,'\0',100);
-      sprintf(lengthbuff,"%x;\r\n",bytes_read);
+      sprintf(lengthbuff,"%x\r\n",bytes_read);
       vprintf("Parent: %s",lengthbuff);
       send(conn,lengthbuff,strlen(lengthbuff),0);
       vprintf("Parent: %s",buffer);

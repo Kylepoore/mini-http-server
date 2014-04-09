@@ -53,6 +53,8 @@
 // };
 
 int parse_req_line(char *buffer, request *req) {
+  char *HTTP1_0 = "HTTP/1.0";
+  char *HTTP1_1 = "HTTP/1.1";
   int i, len;
   char *offset;
 
@@ -82,11 +84,11 @@ int parse_req_line(char *buffer, request *req) {
   req->URI = calloc(len + 1, sizeof(char));
   strncpy(req->URI, offset, len);
 
-  if(strstr(buffer, "HTTP/1.1")) {
-    strcpy(req->version, "HTTP/1.1\0");
+  if(strstr(buffer, HTTP1_1)) {
+    strncpy(req->version, HTTP1_1, strlen(HTTP1_1));
   }
   else {
-    strcpy(req->version, "HTTP/1.0\0");
+    strncpy(req->version, HTTP1_0, strlen(HTTP1_0));
   }
 }
 
@@ -200,6 +202,8 @@ int parse_request(int conn_fd, request *req) {
   } while(req->done == 0);
   if(req->content_length > 0){
     req->content_length = read_body(conn_fd,&(req->body),req->content_length);
+  }else{
+    req->body = NULL;
   }
 }
 

@@ -6,13 +6,16 @@ CC = gcc -O3
 BUILDDIR = ../build
 BINDIR = ../bin
 MODDIR = modules
+TESTDIR = ../public
 MODULES = GET.c POST.c
+TESTS = helloworld.c reflect.c ngen.c
 FRAMEWORK = dispatch.c server.c process_request.c request.c helpers.c
 MODULE_OBJS = $(MODULES:%.c=$(BUILDDIR)/$(MODDIR)/%.o)
 FRAMEWORK_OBJS = $(FRAMEWORK:%.c=$(BUILDDIR)/%.o)
+TESTPROGS = $(TESTS:%.c=$(TESTDIR)/%)
 EXEC = server
 
-all: directories ../public/helloworld ${EXEC}
+all: directories ${TESTPROGS} ${EXEC}
 
 directories:
 	mkdir -p ${BUILDDIR}/${MODDIR} ${BINDIR}
@@ -51,4 +54,4 @@ submit:
 	svn commit -m "submitted for grade"
 
 clean:
-	-rm -rf ${BUILDDIR} ${BINDIR}
+	-rm -rf ${BUILDDIR} ${BINDIR} ${TESTPROGS}

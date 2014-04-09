@@ -7,20 +7,41 @@
   </head>
   <body onload="fun()">
     <h1>Thank you for using mini-http-server</h1>
-    <p><a href="helloworld.c">helloworld:</a></p>
-    <form name="form" action="helloworld" method="POST">
-      <input type="submit" value="Submit">
-      <input type="text" name="user1">
-    </form>
-    <p><a href="reflect.c">reflect:</a></p>
-    <form name="form2" action="reflect" method="POST">
-      <input type="submit" value="Submit">
-      <input type="text" name="user2">
-    </form>
-    <p><a href="ngen.c">ngen:</a></p>
-    <form name="form3" action="ngen" method="POST">
-      <input type="submit" value="Submit">
-      <input type="text" name="user3">
-    </form>
+    <div id="post">
+      <h2>POST</h2>
+      <p><a href="helloworld.c">helloworld:</a></p>
+      <form name="form" action="helloworld" method="POST">
+        <input type="submit" value="Submit">
+        <input type="text" name="user1">
+      </form>
+      <p><a href="reflect.c">reflect:</a></p>
+      <form name="form2" action="reflect" method="POST">
+        <input type="submit" value="Submit">
+        <input type="text" name="user2">
+      </form>
+      <p><a href="ngen.c">ngen:</a></p>
+      <form name="form3" action="ngen" method="POST">
+        <input type="submit" value="Submit">
+        <input type="text" name="user3">
+      </form>
+    </div>
+    <div id="get">
+      <h2>GET</h2>
+      <p><a href="helloworld.c">helloworld:</a></p>
+      <form name="form" action="helloworld" method="GET">
+        <input type="submit" value="Submit">
+        <input type="text" name="user1">
+      </form>
+      <p><a href="reflect.c">reflect:</a></p>
+      <form name="form2" action="reflect" method="GET">
+        <input type="submit" value="Submit">
+        <input type="text" name="user2">
+      </form>
+      <p><a href="ngen.c">ngen:</a></p>
+      <form name="form3" action="ngen" method="GET">
+        <input type="submit" value="Submit">
+        <input type="text" name="user3">
+      </form>
+    </div>
   </body>
 </html>
