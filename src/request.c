@@ -199,7 +199,7 @@ int parse_request(int conn_fd, request *req) {
     }
   } while(req->done == 0);
   if(req->content_length > 0){
-    req->content_length = read_body(conn_fd,req->body,req->content_length);
+    req->content_length = read_body(conn_fd,&(req->body),req->content_length);
   }
 }
 

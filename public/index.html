@@ -3,14 +3,24 @@
   <head>
     <title>Welcome!</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
+    <script type="text/javascript" src="script.js"></script>
   </head>
   <body onload="fun()">
-    <script type="text/javascript" src="script.js"></script>
     <h1>Thank you for using mini-http-server</h1>
+    <p><a href="helloworld.c">helloworld:</a></p>
     <form name="form" action="helloworld" method="POST">
       <input type="submit" value="Submit">
-      <input type="text" name="user">
+      <input type="text" name="user1">
     </form>
-    <p>look at this <a href="helloworld.c">code</a>!</p>
+    <p><a href="reflect.c">reflect:</a></p>
+    <form name="form2" action="reflect" method="POST">
+      <input type="submit" value="Submit">
+      <input type="text" name="user2">
+    </form>
+    <p><a href="ngen.c">ngen:</a></p>
+    <form name="form3" action="ngen" method="POST">
+      <input type="submit" value="Submit">
+      <input type="text" name="user3">
+    </form>
   </body>
 </html>

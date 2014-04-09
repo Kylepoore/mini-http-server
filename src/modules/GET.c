@@ -15,7 +15,9 @@ void GET(int conn, request req){
   memset(buffer,'\0',1024);
   FILE *fp;
   vprintf("GET: %s\n",req.URI);
-  chdir(root_path);
+  if(!chdir(root_path)){
+    perror("chdir:");
+  }
   strncpy(filename,req.URI + 1,strlen(req.URI + 1));
   fp = fopen(filename,"r");
   vprintf("%s/%s\n",root_path,filename);
@@ -52,12 +54,6 @@ void GET(int conn, request req){
       content_type = "Content-Type: text/plain\r\n";
       vprintf("Content-Type: text/plain\r\n");
     }
-
-
-
-
-
-
 
     char content_length[32];
     memset(content_length,'\0',32);
