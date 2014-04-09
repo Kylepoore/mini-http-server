@@ -76,6 +76,7 @@ typedef struct request {
   int content_length;
   char *user_agent;
   int done;
+  char *body;
 } request;
 
 int parse_req_line(char *buffer, request *req);

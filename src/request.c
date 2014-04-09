@@ -138,7 +138,8 @@ void parse_header_line(char *buffer, request *req) {
 }
 
 void parse_req_body(char *buffer, request *req) {
-
+  req->body = buffer;
+  req->done = 1;
 }
 
 int parse_request(int conn_fd, request *req) {
@@ -180,13 +181,13 @@ int parse_request(int conn_fd, request *req) {
         /* Blank line case */
         vprintf("Blank line!\n");
         /* Check if Content-Length header was received */
-        if (req->content_length == -1) {
+        if (req->content_length <= 0) {
           req->done = 1;
         }
         else {
           /* Else got it, and know to look for the request body */
           req_has_body = 1;
-          continue;
+          req->done = 1;
         }
       }
       else if (req_has_body) {
@@ -197,6 +198,9 @@ int parse_request(int conn_fd, request *req) {
       }
     }
   } while(req->done == 0);
+  if(req->content_length > 0){
+    req->content_length = read_body(conn_fd,&(req->body),req->content_length);
+  }
 }
 
 void init_request(request *req) {

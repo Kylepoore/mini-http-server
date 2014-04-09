@@ -17,8 +17,8 @@ all: directories ../public/helloworld ${EXEC}
 directories:
 	mkdir -p ${BUILDDIR}/${MODDIR} ${BINDIR}
 
-../public/helloworld: ../public/helloworld.c
-	${CC} ../public/helloworld.c -o ../public/helloworld
+../public/%: ../public/%.c
+	${CC} ../public/%.c -o ../public/%
 
 ${EXEC}: ${FRAMEWORK_OBJS} ${MODULE_OBJS}
 	${CC} ${FRAMEWORK_OBJS} ${MODULE_OBJS} -o ${BINDIR}/${EXEC}
@@ -43,6 +43,9 @@ ${BUILDDIR}/helpers.o: helpers.c helpers.h
 
 ${BUILDDIR}/${MODDIR}/%.o: ${MODDIR}/%.c ${MODDIR}/%.h
 	${CC} -c $< -o $@
+
+run:
+	../bin/server -v ../public
 
 submit:
 	svn commit -m "submitted for grade"
